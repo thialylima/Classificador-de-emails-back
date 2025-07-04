@@ -38,14 +38,14 @@ async def processar_email(dados: EmailEntrada):
 
     # Prompt enviado para o modelo
     prompt = f"""
-Você é um assistente inteligente de uma empresa do setor financeiro chamada AutoU. Sua tarefa é analisar o e-mail abaixo e fazer duas coisas:
+Você é um assistente inteligente de uma empresa do setor financeiro. Sua tarefa é analisar o e-mail abaixo e fazer duas coisas:
 
 1. Classificar o e-mail em uma das duas categorias:
 
 - Produtivo: Emails que requerem uma ação ou resposta específica, como solicitações de suporte técnico, pedidos de atualização sobre casos em andamento, dúvidas sobre o sistema, entre outros assuntos que precisam de retorno.
 - Improdutivo: Emails que não necessitam de uma ação imediata, como mensagens de felicitações, agradecimentos, votos de boas festas ou perguntas não relevantes.
 
-2. Gerar uma resposta automática apropriada ao conteúdo do e-mail e à categoria atribuída. Se a categoria for Improdutivo, a resposta pode ser simples e cordial. As respostas devem ser em formato de e-mail formal, escrito por Thialy Lima, representando a empresa AutoU.
+2. Gerar uma resposta automática apropriada ao conteúdo do e-mail e à categoria atribuída. Se a categoria for Improdutivo, a resposta pode ser simples e cordial. As respostas devem ser em formato de e-mail formal, escrito por Thialy Lima.
 
 Formato da resposta (sem texto adicional):
 
