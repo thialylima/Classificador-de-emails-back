@@ -7,6 +7,17 @@ Este projeto é um backend desenvolvido com **FastAPI** que utiliza **inteligên
 
 Além da classificação, o sistema também gera **respostas automáticas em formato de e-mail profissional**, escritas por um atendente virtual.
 
+
+---
+
+## 🌐 Deploy
+
+- 🔗 **Backend** hospedado no [Render](https://render.com/)
+- 💻 **Frontend** disponível via GitHub Pages:  
+  👉 [https://thialylima.github.io/Classificador-de-emails-front/](https://thialylima.github.io/Classificador-de-emails-front/)
+
+⚠️ **Importante**: O Render entra em modo de hibernação após 15 minutos de inatividade. Isso pode causar uma pequena demora na primeira resposta após esse tempo.
+
 ---
 
 ## 🚀 Funcionalidades
