@@ -1,43 +1,25 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
+import fitz  # PyMuPDF
 
-# Carrega variáveis de ambiente do arquivo .env
 load_dotenv()
-
-# Inicializa o cliente da OpenAI com a chave da API
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = FastAPI()
 
-# Permitir chamadas do frontend (CORS liberado para testes)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Troque por seu domínio na produção
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Modelo de dados esperado
-class EmailEntrada(BaseModel):
-    email: str
-
-@app.post("/processar-email")
-async def processar_email(dados: EmailEntrada):
-    texto = dados.email.strip()
-
-    if not texto:
-        return {
-            "categoria": "Erro",
-            "resposta": "Texto do e-mail está vazio."
-        }
-
-    # Prompt enviado para o modelo
-    prompt = f"""
+def criar_prompt(texto: str) -> str:
+    return f"""
 Você é um assistente inteligente de uma empresa do setor financeiro. Sua tarefa é analisar o e-mail abaixo e fazer duas coisas:
 
 1. Classificar o e-mail em uma das duas categorias:
@@ -58,6 +40,35 @@ E-mail para análise:
 \"\"\"
 """
 
+@app.post("/processar")
+async def processar(email: str = Form(None), file: UploadFile = File(None)):
+    texto = ""
+
+    # Se tiver texto
+    if email:
+        texto += email.strip()
+
+    # Se tiver arquivo
+    if file:
+        if not file.filename.lower().endswith((".pdf", ".txt")):
+            raise HTTPException(status_code=400, detail="Apenas arquivos PDF ou TXT são aceitos.")
+        try:
+            if file.filename.lower().endswith(".pdf"):
+                contents = await file.read()
+                doc = fitz.open(stream=contents, filetype="pdf")
+                for pagina in doc:
+                    texto += "\n" + pagina.get_text()
+            else:  # TXT
+                texto += "\n" + (await file.read()).decode("utf-8")
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Erro ao ler o arquivo: {str(e)}")
+
+    # Validação final
+    if not texto.strip():
+        return {"categoria": "Erro", "resposta": "Nenhum conteúdo foi enviado."}
+
+    prompt = criar_prompt(texto.strip())
+
     try:
         resposta = client.chat.completions.create(
             model="gpt-4.1-mini",
@@ -65,7 +76,6 @@ E-mail para análise:
             max_tokens=300,
             temperature=0.5,
         )
-
         conteudo = resposta.choices[0].message.content.strip()
 
         categoria = "Desconhecida"
@@ -76,13 +86,7 @@ E-mail para análise:
             categoria = partes[0].replace("Categoria:", "").strip()
             resposta_gerada = partes[1].strip()
 
-        return {
-            "categoria": categoria,
-            "resposta": resposta_gerada
-        }
+        return {"categoria": categoria, "resposta": resposta_gerada}
 
     except Exception as e:
-        return {
-            "categoria": "Erro",
-            "resposta": f"Erro ao gerar resposta: {str(e)}"
-        }
+        return {"categoria": "Erro", "resposta": f"Erro ao gerar resposta: {str(e)}"}
