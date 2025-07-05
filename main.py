@@ -63,7 +63,7 @@ async def processar(email: str = Form(None), file: UploadFile = File(None)):
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Erro ao ler o arquivo: {str(e)}")
 
-    # Validação final
+    #  Validação final
     if not texto.strip():
         return {"categoria": "Erro", "resposta": "Nenhum conteúdo foi enviado."}
 
