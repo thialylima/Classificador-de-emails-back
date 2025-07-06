@@ -59,7 +59,7 @@ async def processar(email: str = Form(None), file: UploadFile = File(None)):
                 for pagina in doc:
                     texto += "\n" + pagina.get_text()
             else:  # TXT
-                texto += "\n" + (await file.read()).decode("utf-8")
+                texto += "\n" + (await file.read()).decode("utf-8", errors="ignore")
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Erro ao ler o arquivo: {str(e)}")
 
